@@ -7,7 +7,7 @@ import { animate, stagger } from "animejs";
 
 export default function LegacyShell({ html, scriptSrc, needsXlsx = false }) {
   useEffect(() => {
-    animate(".card, .choice-card, .dropzone, .attestation", {
+    animate(".card, .choice-card, .dropzone, .attestation, .pill, .status, .badge", {
       opacity: [0, 1],
       translateY: [16, 0],
       delay: stagger(40, { start: 80 }),

@@ -42,6 +42,7 @@
       --muted: var(--crowe-tint-700);
       --border: var(--crowe-tint-100);
       --border-strong: var(--crowe-tint-300);
+      --muted-surface: var(--pill-bg);
 
       --accent: var(--crowe-amber-core);
       --accent-strong: var(--crowe-amber-dark);
@@ -74,6 +75,23 @@
       --space-5: 1.25rem;
       --space-6: 1.5rem;
       --space-8: 2rem;
+
+      --background: var(--bg);
+      --foreground: var(--text);
+      --card-foreground: var(--text);
+      --popover: var(--card);
+      --popover-foreground: var(--text);
+      --primary: var(--accent);
+      --primary-foreground: var(--accent-ink);
+      --secondary: var(--bg-accent);
+      --secondary-foreground: var(--text);
+      --muted-foreground: var(--muted);
+      --accent-foreground: var(--accent-ink);
+      --destructive: var(--danger);
+      --destructive-foreground: #ffffff;
+      --input: var(--border-strong);
+      --ring: var(--accent-strong);
+      --radius: 12px;
     }
 
     body.dark {
@@ -104,6 +122,23 @@
       --pill-text: #F5F7FB;
       --table-header: rgba(255, 255, 255, 0.12);
       --table-row: rgba(255, 255, 255, 0.05);
+
+      --background: var(--bg);
+      --foreground: var(--text);
+      --card-foreground: var(--text);
+      --popover: var(--card);
+      --popover-foreground: var(--text);
+      --primary: var(--accent);
+      --primary-foreground: var(--accent-ink);
+      --secondary: var(--bg-accent);
+      --secondary-foreground: var(--text);
+      --muted-foreground: var(--muted);
+      --accent-foreground: var(--accent-ink);
+      --destructive: var(--danger);
+      --destructive-foreground: #0b111f;
+      --input: var(--border-strong);
+      --ring: var(--accent-strong);
+      --radius: 12px;
     }
 
     * {
@@ -494,3 +529,44 @@
     .choice-card button {
       width: 100%;
     }
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border bg-card text-card-foreground shadow-sm;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-2 rounded-full border bg-muted px-3 py-1 text-xs font-semibold text-foreground;
+  }
+
+  .status {
+    @apply inline-flex items-center gap-2 rounded-full border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full border bg-secondary px-2 py-1 text-xs font-semibold text-secondary-foreground;
+  }
+
+  .toggle-btn {
+    @apply rounded-full border bg-card text-foreground shadow-sm;
+  }
+
+  .choice-card {
+    @apply rounded-xl border bg-card text-card-foreground shadow-sm;
+  }
+
+  .dropzone {
+    @apply border border-dashed bg-secondary;
+  }
+}
+      --muted-surface: var(--pill-bg);
