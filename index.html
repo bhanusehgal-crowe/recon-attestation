@@ -1562,6 +1562,18 @@
         el.className = "status" + (status ? " " + status : "");
       }
 
+      async function apiRequestJson(url, options) {
+        const opts = options || {};
+        const headers = Object.assign({ "Content-Type": "application/json" }, opts.headers || {});
+        const res = await fetch(url, Object.assign({}, opts, { headers }));
+        if (!res.ok) {
+          const message = await res.text();
+          throw new Error(message || `Request failed (${res.status})`);
+        }
+        if (res.status === 204) return null;
+        return res.json();
+      }
+
       async function loadLatestPackage() {
         try {
           setStatus(els.packageStatus, "Loading latest package...", "warning");
