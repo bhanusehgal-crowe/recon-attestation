@@ -362,12 +362,16 @@
             <button id="downloadPackageBtn">Publish Package</button>
             <span class="status" id="packageStatus">Not Ready</span>
           </div>
-          <div class="form-row" style="margin-top: 10px;">
-            <button class="secondary" id="deletePackageBtn">Delete Latest Package</button>
-            <span class="muted" id="deletePackageStatus"></span>
-          </div>
-          <p class="footnote">The package contains only the incorrect entries and missing memos needed for each employee.</p>
-        </section>
+      <div class="form-row" style="margin-top: 10px;">
+        <button class="secondary" id="deletePackageBtn">Delete Latest Package</button>
+        <span class="muted" id="deletePackageStatus"></span>
+      </div>
+      <div class="form-row" style="margin-top: 10px;">
+        <button class="secondary" id="deleteAllPackagesBtn">Delete All Packages</button>
+        <span class="muted" id="deleteAllPackagesStatus"></span>
+      </div>
+      <p class="footnote">The package contains only the incorrect entries and missing memos needed for each employee.</p>
+    </section>
 
       <section class="card" id="attestationSection">
       <h2>Attestation Intake</h2>
@@ -418,6 +422,8 @@
       downloadPackageBtn: document.getElementById("downloadPackageBtn"),
       deletePackageBtn: document.getElementById("deletePackageBtn"),
       deletePackageStatus: document.getElementById("deletePackageStatus"),
+      deleteAllPackagesBtn: document.getElementById("deleteAllPackagesBtn"),
+      deleteAllPackagesStatus: document.getElementById("deleteAllPackagesStatus"),
       refreshAttestationsBtn: document.getElementById("refreshAttestationsBtn"),
       attestationStatus: document.getElementById("attestationStatus"),
       attestationSummary: document.getElementById("attestationSummary"),
@@ -990,6 +996,18 @@
     }
   }
 
+  async function deleteAllPackages() {
+    if (!confirm("Delete ALL published packages? This cannot be undone.")) return;
+    elements.deleteAllPackagesStatus.textContent = "Deleting...";
+    try {
+      const data = await apiRequestJson("/api/packages", { method: "DELETE" });
+      elements.deleteAllPackagesStatus.textContent = `Deleted ${data.count || 0} package(s)`;
+      state.packageId = "";
+    } catch (err) {
+      elements.deleteAllPackagesStatus.textContent = err.message || "Delete failed";
+    }
+  }
+
     function updateAdminOutput() {
       if (!state.summaries) return;
       const { summariesById, entriesInRange, unmatched, ambiguousEntries } = state.summaries;
@@ -1508,6 +1526,7 @@
 
   elements.downloadPackageBtn.addEventListener("click", publishEmployeePackage);
   elements.deletePackageBtn.addEventListener("click", deleteLatestPackage);
+  elements.deleteAllPackagesBtn.addEventListener("click", deleteAllPackages);
     elements.refreshAttestationsBtn.addEventListener("click", refreshAttestationStatus);
     elements.exportBtn.addEventListener("click", exportAdminReport);
 

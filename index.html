@@ -432,6 +432,10 @@
             <button class="secondary" id="admin-deletePackageBtn">Delete Latest Package</button>
             <span class="muted" id="admin-deletePackageStatus"></span>
           </div>
+          <div class="form-row" style="margin-top: 10px;">
+            <button class="secondary" id="admin-deleteAllPackagesBtn">Delete All Packages</button>
+            <span class="muted" id="admin-deleteAllPackagesStatus"></span>
+          </div>
           <p class="footnote">The package contains only the incorrect entries and missing memos needed for each employee.</p>
         </section>
 
@@ -564,6 +568,8 @@
         downloadPackageBtn: document.getElementById("admin-downloadPackageBtn"),
         deletePackageBtn: document.getElementById("admin-deletePackageBtn"),
         deletePackageStatus: document.getElementById("admin-deletePackageStatus"),
+        deleteAllPackagesBtn: document.getElementById("admin-deleteAllPackagesBtn"),
+        deleteAllPackagesStatus: document.getElementById("admin-deleteAllPackagesStatus"),
         refreshAttestationsBtn: document.getElementById("admin-refreshAttestationsBtn"),
         attestationStatus: document.getElementById("admin-attestationStatus"),
         attestationSummary: document.getElementById("admin-attestationSummary"),
@@ -1150,6 +1156,18 @@
       }
     }
 
+    async function deleteAllPackages() {
+      if (!confirm("Delete ALL published packages? This cannot be undone.")) return;
+      els.deleteAllPackagesStatus.textContent = "Deleting...";
+      try {
+        const data = await apiRequestJson("/api/packages", { method: "DELETE" });
+        els.deleteAllPackagesStatus.textContent = `Deleted ${data.count || 0} package(s)`;
+        state.packageId = "";
+      } catch (err) {
+        els.deleteAllPackagesStatus.textContent = err.message || "Delete failed";
+      }
+    }
+
       function updateAdminOutput() {
         if (!state.summaries) return;
         const { summariesById, entriesInRange, unmatched, ambiguousEntries } = state.summaries;
@@ -1661,6 +1679,7 @@
 
     els.downloadPackageBtn.addEventListener("click", publishEmployeePackage);
     els.deletePackageBtn.addEventListener("click", deleteLatestPackage);
+    els.deleteAllPackagesBtn.addEventListener("click", deleteAllPackages);
       els.refreshAttestationsBtn.addEventListener("click", refreshAttestationStatus);
       els.exportBtn.addEventListener("click", exportAdminReport);
 
