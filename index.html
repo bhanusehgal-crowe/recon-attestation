@@ -428,6 +428,10 @@
             <button id="admin-downloadPackageBtn">Publish Package</button>
             <span class="status" id="admin-packageStatus">Not Ready</span>
           </div>
+          <div class="form-row" style="margin-top: 10px;">
+            <button class="secondary" id="admin-deletePackageBtn">Delete Latest Package</button>
+            <span class="muted" id="admin-deletePackageStatus"></span>
+          </div>
           <p class="footnote">The package contains only the incorrect entries and missing memos needed for each employee.</p>
         </section>
 
@@ -558,6 +562,8 @@
         packageSummary: document.getElementById("admin-packageSummary"),
         packageStatus: document.getElementById("admin-packageStatus"),
         downloadPackageBtn: document.getElementById("admin-downloadPackageBtn"),
+        deletePackageBtn: document.getElementById("admin-deletePackageBtn"),
+        deletePackageStatus: document.getElementById("admin-deletePackageStatus"),
         refreshAttestationsBtn: document.getElementById("admin-refreshAttestationsBtn"),
         attestationStatus: document.getElementById("admin-attestationStatus"),
         attestationSummary: document.getElementById("admin-attestationSummary"),
@@ -1132,6 +1138,18 @@
       }
     }
 
+    async function deleteLatestPackage() {
+      if (!confirm("Delete the latest published package? This cannot be undone.")) return;
+      els.deletePackageStatus.textContent = "Deleting...";
+      try {
+        const data = await apiRequestJson("/api/packages/latest", { method: "DELETE" });
+        els.deletePackageStatus.textContent = `Deleted ${data.packageId}`;
+        state.packageId = "";
+      } catch (err) {
+        els.deletePackageStatus.textContent = err.message || "Delete failed";
+      }
+    }
+
       function updateAdminOutput() {
         if (!state.summaries) return;
         const { summariesById, entriesInRange, unmatched, ambiguousEntries } = state.summaries;
@@ -1641,7 +1659,8 @@
       els.startDate.addEventListener("change", () => recompute());
       els.endDate.addEventListener("change", () => recompute());
 
-      els.downloadPackageBtn.addEventListener("click", publishEmployeePackage);
+    els.downloadPackageBtn.addEventListener("click", publishEmployeePackage);
+    els.deletePackageBtn.addEventListener("click", deleteLatestPackage);
       els.refreshAttestationsBtn.addEventListener("click", refreshAttestationStatus);
       els.exportBtn.addEventListener("click", exportAdminReport);
 

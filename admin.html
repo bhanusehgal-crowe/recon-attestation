@@ -357,13 +357,17 @@
       <section class="card" id="packageSection">
       <h2>Employee Package</h2>
       <p>After loading the workbooks and date range, publish the employee package to the server.</p>
-      <div class="summary-row" id="packageSummary"></div>
-      <div class="form-row">
-        <button id="downloadPackageBtn">Publish Package</button>
-        <span class="status" id="packageStatus">Not Ready</span>
-      </div>
-      <p class="footnote">The package contains only the incorrect entries and missing memos needed for each employee.</p>
-      </section>
+          <div class="summary-row" id="packageSummary"></div>
+          <div class="form-row">
+            <button id="downloadPackageBtn">Publish Package</button>
+            <span class="status" id="packageStatus">Not Ready</span>
+          </div>
+          <div class="form-row" style="margin-top: 10px;">
+            <button class="secondary" id="deletePackageBtn">Delete Latest Package</button>
+            <span class="muted" id="deletePackageStatus"></span>
+          </div>
+          <p class="footnote">The package contains only the incorrect entries and missing memos needed for each employee.</p>
+        </section>
 
       <section class="card" id="attestationSection">
       <h2>Attestation Intake</h2>
@@ -412,6 +416,8 @@
       packageSummary: document.getElementById("packageSummary"),
       packageStatus: document.getElementById("packageStatus"),
       downloadPackageBtn: document.getElementById("downloadPackageBtn"),
+      deletePackageBtn: document.getElementById("deletePackageBtn"),
+      deletePackageStatus: document.getElementById("deletePackageStatus"),
       refreshAttestationsBtn: document.getElementById("refreshAttestationsBtn"),
       attestationStatus: document.getElementById("attestationStatus"),
       attestationSummary: document.getElementById("attestationSummary"),
@@ -972,6 +978,18 @@
     }
   }
 
+  async function deleteLatestPackage() {
+    if (!confirm("Delete the latest published package? This cannot be undone.")) return;
+    elements.deletePackageStatus.textContent = "Deleting...";
+    try {
+      const data = await apiRequestJson("/api/packages/latest", { method: "DELETE" });
+      elements.deletePackageStatus.textContent = `Deleted ${data.packageId}`;
+      state.packageId = "";
+    } catch (err) {
+      elements.deletePackageStatus.textContent = err.message || "Delete failed";
+    }
+  }
+
     function updateAdminOutput() {
       if (!state.summaries) return;
       const { summariesById, entriesInRange, unmatched, ambiguousEntries } = state.summaries;
@@ -1488,7 +1506,8 @@
     elements.startDate.addEventListener("change", () => recompute());
     elements.endDate.addEventListener("change", () => recompute());
 
-    elements.downloadPackageBtn.addEventListener("click", publishEmployeePackage);
+  elements.downloadPackageBtn.addEventListener("click", publishEmployeePackage);
+  elements.deletePackageBtn.addEventListener("click", deleteLatestPackage);
     elements.refreshAttestationsBtn.addEventListener("click", refreshAttestationStatus);
     elements.exportBtn.addEventListener("click", exportAdminReport);
 

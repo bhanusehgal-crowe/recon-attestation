@@ -1,11 +1,8 @@
+import { del } from "@vercel/blob";
 import { getSql } from "../_lib/db.js";
 import { sendJson, sendText } from "../_lib/http.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    return sendText(res, 405, "Method not allowed");
-  }
-
   try {
     const sql = getSql();
     const rows = await sql`
@@ -17,6 +14,25 @@ export default async function handler(req, res) {
 
     if (!rows || rows.length === 0) {
       return sendText(res, 404, "No package published yet");
+    }
+
+    if (req.method === "DELETE") {
+      const packageId = rows[0].package_id;
+      const blobUrl = rows[0].blob_url;
+      if (blobUrl) {
+        try {
+          await del(blobUrl);
+        } catch (err) {
+          // If blob deletion fails, still delete DB record to allow recovery.
+          console.error("Blob delete failed:", err);
+        }
+      }
+      await sql`delete from packages where package_id = ${packageId}`;
+      return sendJson(res, 200, { deleted: true, packageId });
+    }
+
+    if (req.method !== "GET") {
+      return sendText(res, 405, "Method not allowed");
     }
 
     const response = await fetch(rows[0].blob_url);
