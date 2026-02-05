@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crowe Hourly Charge Reconciliation - Employee</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f6f2;
+      --bg-accent: #eef0f4;
+      --card: #ffffff;
+      --text: #1c232b;
+      --muted: #5b6775;
+      --border: #d8dfe7;
+      --accent: #1f5f8b;
+      --accent-2: #0f4c5c;
+      --success: #1b7f5f;
+      --warning: #b86b00;
+      --danger: #a61b1b;
+      --shadow: 0 18px 35px rgba(18, 38, 63, 0.12);
+      --pill-bg: #eef3f8;
+      --pill-text: #1d384e;
+      --table-header: #f1f4f9;
+      --table-row: #f9fbfe;
+    }
+
+    body.dark {
+      color-scheme: dark;
+      --bg: #0e1116;
+      --bg-accent: #1b212b;
+      --card: #141b24;
+      --text: #e7edf4;
+      --muted: #a9b4c2;
+      --border: #263243;
+      --accent: #6fb1e6;
+      --accent-2: #9ad1c7;
+      --success: #49c192;
+      --warning: #f0a23b;
+      --danger: #ef6b6b;
+      --shadow: 0 18px 35px rgba(3, 8, 17, 0.35);
+      --pill-bg: #1c2633;
+      --pill-text: #c7d9ee;
+      --table-header: #1c2633;
+      --table-row: #141b24;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Calibri, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(31, 95, 139, 0.1), transparent 55%),
+        radial-gradient(circle at 10% 20%, rgba(15, 76, 92, 0.08), transparent 45%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: clamp(18px, 3vw, 36px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(16px, 2vw, 28px);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 34px);
+      letter-spacing: 0.2px;
+    }
+
+    header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      max-width: 720px;
+      line-height: 1.5;
+    }
+
+    .toggle-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      font-weight: 600;
+      transition: transform 0.2s ease, border 0.2s ease;
+    }
+
+    .toggle-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: clamp(16px, 2vw, 24px);
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: clamp(18px, 2vw, 22px);
+    }
+
+    .card p {
+      margin: 8px 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--pill-bg);
+      color: var(--pill-text);
+    }
+
+    .status.success {
+      background: rgba(27, 127, 95, 0.16);
+      color: var(--success);
+    }
+
+    .status.warning {
+      background: rgba(184, 107, 0, 0.16);
+      color: var(--warning);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: clamp(6px, 1vw, 10px) clamp(12px, 2vw, 18px);
+      border-radius: 999px;
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      font-weight: 600;
+      font-size: clamp(12px, 1.1vw, 14px);
+    }
+
+    .pill strong {
+      font-weight: 700;
+    }
+
+    .summary-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    label {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    select, input[type="date"], input[type="text"] {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 14px;
+      background: var(--card);
+      color: var(--text);
+      min-width: 160px;
+    }
+
+    button {
+      border: none;
+      background: var(--accent);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    button.secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--table-header);
+      font-weight: 700;
+    }
+
+    tr:nth-child(even) td {
+      background: var(--table-row);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .alert {
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(166, 27, 27, 0.08);
+      color: var(--danger);
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    .success {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .attestation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px dashed var(--border);
+      background: var(--bg-accent);
+    }
+
+    .attestation label {
+      font-weight: 500;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(31, 95, 139, 0.12);
+      color: var(--accent);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .footnote {
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Crowe Hourly Charge Reconciliation</h1>
+        <p>Employee page for reviewing your time reconciliation and submitting your attestation. The latest package loads automatically.</p>
+      </div>
+      <button class="toggle-btn" id="themeToggle">Enable Dark Mode</button>
+    </header>
+
+    <section class="card" id="packageSection">
+      <h2>Latest Package</h2>
+      <p>The latest reconciliation package loads automatically from the server.</p>
+      <div class="form-row">
+        <span class="status" id="packageStatus">Loading latest package...</span>
+      </div>
+      <div class="summary-row" id="packageInfo"></div>
+    </section>
+
+    <section class="card" id="employeeSection">
+      <h2>Employee View</h2>
+      <div class="form-row">
+        <label for="employeeSelect">Employee</label>
+          <select id="employeeSelect">
+            <option value="">Employees will appear once the package loads</option>
+          </select>
+        <span class="badge" id="employeeStatus">Not Ready</span>
+      </div>
+      <div class="summary-row" id="employeeSummary"></div>
+      <div id="employeeOutput"></div>
+      <div class="attestation hidden" id="attestationPanel">
+        <div id="attestationMessage" class="muted"></div>
+        <div class="form-row" style="margin-top: 10px;">
+          <input type="checkbox" id="attestationCheck" />
+          <label for="attestationCheck">I confirm this reconciliation is accurate for the selected period.</label>
+        </div>
+        <div class="form-row" style="margin-top: 10px;">
+          <button id="attestBtn">Submit Attestation</button>
+          <span class="muted" id="attestationStatus"></span>
+        </div>
+        <p class="footnote">Your view and attestation are saved automatically.</p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      pkg: null,
+      assignments: [],
+      assignmentsById: new Map(),
+      summariesById: new Map(),
+      currentEmployeeId: ""
+    };
+
+    const elements = {
+      packageStatus: document.getElementById("packageStatus"),
+      packageInfo: document.getElementById("packageInfo"),
+      employeeSelect: document.getElementById("employeeSelect"),
+      employeeStatus: document.getElementById("employeeStatus"),
+      employeeSummary: document.getElementById("employeeSummary"),
+      employeeOutput: document.getElementById("employeeOutput"),
+      attestationPanel: document.getElementById("attestationPanel"),
+      attestationMessage: document.getElementById("attestationMessage"),
+      attestationCheck: document.getElementById("attestationCheck"),
+      attestationStatus: document.getElementById("attestationStatus"),
+      attestBtn: document.getElementById("attestBtn")
+    };
+
+    function normalizeText(value) {
+      return String(value || "").trim().replace(/\s+/g, " ").toLowerCase();
+    }
+
+    function normalizeName(value) {
+      if (!value) return "";
+      let text = String(value).trim();
+      if (text.includes(",")) {
+        const parts = text.split(",");
+        const last = parts[0].trim();
+        const rest = parts.slice(1).join(" ").trim();
+        if (rest) text = rest + " " + last;
+      }
+      text = text.replace(/[^a-zA-Z\s]/g, " ");
+      return text.replace(/\s+/g, " ").trim().toLowerCase();
+    }
+
+    function formatDisplayDate(value) {
+      if (!value) return "";
+      const date = value instanceof Date ? value : new Date(value);
+      if (isNaN(date)) return "";
+      return date.toLocaleDateString("en-US");
+    }
+
+    function setStatus(el, text, status) {
+      el.textContent = text;
+      el.className = "status" + (status ? " " + status : "");
+    }
+
+    async function apiRequestJson(url, options) {
+      const opts = options || {};
+      const headers = Object.assign({ "Content-Type": "application/json" }, opts.headers || {});
+      const res = await fetch(url, Object.assign({}, opts, { headers }));
+      if (!res.ok) {
+        const message = await res.text();
+        throw new Error(message || `Request failed (${res.status})`);
+      }
+      if (res.status === 204) return null;
+      return res.json();
+    }
+
+    async function loadLatestPackage() {
+      try {
+        setStatus(elements.packageStatus, "Loading latest package...", "warning");
+        const pkg = await apiRequestJson("/api/packages/latest");
+        if (!pkg || !pkg.assignments || !pkg.summaries) {
+          throw new Error("No package available.");
+        }
+        state.pkg = pkg;
+        state.assignments = pkg.assignments;
+        state.assignmentsById = new Map();
+        state.summariesById = new Map();
+        state.assignments.forEach((assignment) => {
+          state.assignmentsById.set(assignment.id, assignment);
+        });
+        Object.keys(pkg.summaries).forEach((id) => {
+          state.summariesById.set(id, pkg.summaries[id]);
+        });
+        populateEmployeeDropdown();
+        updatePackageInfo();
+        setStatus(elements.packageStatus, "Package Loaded", "success");
+        elements.employeeStatus.textContent = "Ready";
+      } catch (err) {
+        setStatus(elements.packageStatus, err.message || "Failed to load", "warning");
+      }
+    }
+
+    function updatePackageInfo() {
+      if (!state.pkg) return;
+      elements.packageInfo.innerHTML = `
+        <span class="pill"><strong>Period:</strong> ${state.pkg.period.start} to ${state.pkg.period.end}</span>
+        <span class="pill"><strong>Employees:</strong> ${state.assignments.length}</span>
+        <span class="pill"><strong>Generated:</strong> ${new Date(state.pkg.generatedAt).toLocaleString("en-US")}</span>
+      `;
+    }
+
+    function populateEmployeeDropdown() {
+      elements.employeeSelect.innerHTML = "";
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "Select your name";
+      elements.employeeSelect.appendChild(placeholder);
+
+      const sorted = [...state.assignments].sort((a, b) => a.name.localeCompare(b.name));
+      sorted.forEach((assignment) => {
+        const option = document.createElement("option");
+        option.value = assignment.id;
+        const suffix = assignment.workerIdRaw ? ` (${assignment.workerIdRaw})` : "";
+        const amb = assignment.ambiguousName ? " [Ambiguous]" : "";
+        option.textContent = `${assignment.name}${suffix}${amb}`;
+        elements.employeeSelect.appendChild(option);
+      });
+    }
+
+    async function postAttestationEvent(eventType, details) {
+      if (!state.pkg || !state.currentEmployeeId) return;
+      const assignment = state.assignmentsById.get(state.currentEmployeeId);
+      if (!assignment) return;
+      try {
+        await apiRequestJson("/api/attestations", {
+          method: "POST",
+          body: JSON.stringify({
+            packageId: state.pkg.packageId,
+            employeeKey: assignment.employeeKey,
+            employeeName: assignment.name,
+            workerId: assignment.workerIdRaw || "",
+            eventType,
+            details: details || ""
+          })
+        });
+      } catch (err) {
+        elements.attestationStatus.textContent = err.message || "Unable to save attestation.";
+        elements.attestationStatus.className = "alert";
+      }
+    }
+
+    function updateEmployeeView() {
+      const selectedId = elements.employeeSelect.value;
+      elements.employeeSummary.innerHTML = "";
+      elements.employeeOutput.innerHTML = "";
+      elements.attestationPanel.classList.add("hidden");
+      elements.attestationStatus.textContent = "";
+      elements.attestationStatus.className = "muted";
+      elements.attestationCheck.checked = false;
+      state.currentEmployeeId = selectedId;
+
+      if (!selectedId || !state.pkg) return;
+      const assignment = state.assignmentsById.get(selectedId);
+      const summary = state.summariesById.get(selectedId) || {
+        entryCount: 0,
+        incorrectEntries: [],
+        missingMemos: [],
+        ambiguous: assignment ? assignment.ambiguousName : false
+      };
+
+      postAttestationEvent("Viewed", `Range ${state.pkg.period.start} to ${state.pkg.period.end}`);
+      elements.attestationStatus.textContent = "View saved.";
+      elements.attestationStatus.className = "muted";
+
+      elements.employeeSummary.innerHTML = `
+        <span class="pill"><strong>Expected Service Line:</strong> ${assignment.serviceLine || "Unknown"}</span>
+        <span class="pill"><strong>Total Entries:</strong> ${summary.entryCount}</span>
+        <span class="pill"><strong>Incorrect Entries:</strong> ${summary.incorrectEntries.length}</span>
+        <span class="pill"><strong>Missing Memos:</strong> ${summary.missingMemos.length}</span>
+        ${summary.ambiguous ? `<span class="pill" style="color: var(--warning);">Ambiguous name match detected</span>` : ""}
+      `;
+
+      if (summary.entryCount === 0) {
+        elements.employeeOutput.innerHTML = "<p class='muted'>No time entries found for this date range.</p>";
+      } else if (summary.incorrectEntries.length === 0) {
+        elements.employeeOutput.innerHTML = "<p class='success'>You are amazing, you don’t need any reconciliations.</p>";
+      } else {
+        elements.employeeOutput.innerHTML = `
+          <h3>Incorrect Entries</h3>
+          ${renderEntriesTable(summary.incorrectEntries)}
+        `;
+      }
+
+      if (summary.missingMemos.length > 0) {
+        elements.employeeOutput.innerHTML += `
+          <h3>Entries Missing Memos</h3>
+          ${renderEntriesTable(summary.missingMemos)}
+        `;
+      }
+
+      const attestationText = summary.missingMemos.length > 0
+        ? "Please attest that you will return to both systems to update any incorrect hours and add missing memo entries."
+        : "Please attest that your time reconciliation is accurate for this period.";
+      elements.attestationMessage.textContent = attestationText;
+      elements.attestationPanel.classList.remove("hidden");
+    }
+
+    function renderEntriesTable(entries) {
+      if (!entries || entries.length === 0) {
+        return "<p class='muted'>No entries.</p>";
+      }
+      const rows = entries.map((entry) => `
+        <tr>
+          <td>${formatDisplayDate(entry.date)}</td>
+          <td>${entry.taskDesc || ""}</td>
+          <td>${entry.project || ""}</td>
+          <td>${entry.hours || ""}</td>
+          <td>${entry.memo || ""}</td>
+        </tr>
+      `).join("");
+      return `
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Task Desc</th>
+              <th>Project</th>
+              <th>Hours</th>
+              <th>Memo</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    loadLatestPackage();
+
+    elements.employeeSelect.addEventListener("change", () => updateEmployeeView());
+
+    elements.attestBtn.addEventListener("click", async () => {
+      if (!elements.attestationCheck.checked) {
+        elements.attestationStatus.textContent = "Please check the confirmation box first.";
+        elements.attestationStatus.className = "alert";
+        return;
+      }
+      await postAttestationEvent("Attested", `Range ${state.pkg.period.start} to ${state.pkg.period.end}`);
+      elements.attestationStatus.textContent = `Attested on ${new Date().toLocaleString("en-US")}`;
+      elements.attestationStatus.className = "success";
+    });
+
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const dark = document.body.classList.contains("dark");
+      document.getElementById("themeToggle").textContent = dark ? "Enable Light Mode" : "Enable Dark Mode";
+      localStorage.setItem("crowe_theme_employee", dark ? "dark" : "light");
+    });
+
+    (function initTheme() {
+      const stored = localStorage.getItem("crowe_theme_employee");
+      if (stored === "dark") {
+        document.body.classList.add("dark");
+        document.getElementById("themeToggle").textContent = "Enable Light Mode";
+      }
+    })();
+  </script>
+</body>
+</html>
