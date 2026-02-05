@@ -11,8 +11,12 @@ const landingView = document.getElementById("landingView");
       if (view === "landing") landingView.classList.remove("hidden");
     }
 
-    document.getElementById("goAdminBtn").addEventListener("click", () => showView("admin"));
-    document.getElementById("goEmployeeBtn").addEventListener("click", () => showView("employee"));
+    document.getElementById("goAdminBtn").addEventListener("click", () => {
+      window.location.href = "/admin";
+    });
+    document.getElementById("goEmployeeBtn").addEventListener("click", () => {
+      window.location.href = "/employee";
+    });
     document.getElementById("adminBackBtn").addEventListener("click", () => showView("landing"));
     document.getElementById("empBackBtn").addEventListener("click", () => showView("landing"));
 
