@@ -1478,24 +1478,9 @@
         XLSX.utils.book_append_sheet(wb, missingSheet, "Missing Memos");
       }
 
-      if (state.attestationEvents && state.attestationEvents.length > 0) {
-        const logRows = [["Employee", "Worker ID", "Event", "Timestamp", "Details"]];
-        state.attestationEvents.forEach((event) => {
-          logRows.push([
-            event.employeeName || "",
-              event.workerId || "",
-              event.eventType || "",
-              event.createdAt ? new Date(event.createdAt).toLocaleString("en-US") : "",
-              event.details || ""
-            ]);
-          });
-          const logSheet = XLSX.utils.aoa_to_sheet(logRows);
-          XLSX.utils.book_append_sheet(wb, logSheet, "Attestation Log");
-        }
-
-        if (unmatched.length > 0) {
-          const unmatchedData = [["Date", "Worker", "Worker ID", "Task Desc", "Project", "Hours", "Memo"]];
-          unmatched.forEach((entry) => {
+      if (unmatched.length > 0) {
+        const unmatchedData = [["Date", "Worker", "Worker ID", "Task Desc", "Project", "Hours", "Memo"]];
+        unmatched.forEach((entry) => {
             unmatchedData.push([
               formatDisplayDate(entry.date),
               entry.workerName,
@@ -1505,16 +1490,59 @@
               entry.hours,
               entry.memo
             ]);
-          });
-          const unmatchedSheet = XLSX.utils.aoa_to_sheet(unmatchedData);
-          XLSX.utils.book_append_sheet(wb, unmatchedSheet, "Unmatched");
-        }
+        });
+        const unmatchedSheet = XLSX.utils.aoa_to_sheet(unmatchedData);
+        XLSX.utils.book_append_sheet(wb, unmatchedSheet, "Unmatched");
+      }
 
-      const usedNames = new Set(["Dashboard", "Incorrect Entries", "Missing Memos", "Attestation Log", "Unmatched"]);
-        state.assignments.forEach((assignment) => {
-          const summary = summariesById.get(assignment.id);
-          const incorrect = summary ? summary.incorrectEntries : [];
-          const missing = summary ? summary.missingMemos : [];
+      if (state.attestationEvents && state.attestationEvents.length > 0) {
+        const logRows = [["Employee", "Worker ID", "Event", "Timestamp", "Details"]];
+        state.attestationEvents.forEach((event) => {
+          logRows.push([
+            event.employeeName || "",
+            event.workerId || "",
+            event.eventType || "",
+            event.createdAt ? new Date(event.createdAt).toLocaleString("en-US") : "",
+            event.details || ""
+          ]);
+        });
+        const logSheet = XLSX.utils.aoa_to_sheet(logRows);
+        XLSX.utils.book_append_sheet(wb, logSheet, "Attestation Log");
+      }
+
+      const usedNames = new Set(["Dashboard", "Incorrect Entries", "Missing Memos", "Unmatched", "Attestation Log"]);
+      const employeeSheetItems = state.assignments.map((assignment) => {
+        const summary = summariesById.get(assignment.id);
+        const incorrect = summary ? summary.incorrectEntries.length : 0;
+        const missing = summary ? summary.missingMemos.length : 0;
+        return {
+          assignment,
+          incorrect,
+          missing,
+          total: incorrect + missing,
+          hasBoth: incorrect > 0 && missing > 0
+        };
+      });
+
+      const withErrors = employeeSheetItems
+        .filter((item) => item.total > 0)
+        .sort((a, b) => {
+          if (b.total !== a.total) return b.total - a.total;
+          if (a.hasBoth !== b.hasBoth) return a.hasBoth ? -1 : 1;
+          if (b.incorrect !== a.incorrect) return b.incorrect - a.incorrect;
+          if (b.missing !== a.missing) return b.missing - a.missing;
+          return a.assignment.name.localeCompare(b.assignment.name);
+        });
+
+      const noErrors = employeeSheetItems
+        .filter((item) => item.total === 0)
+        .sort((a, b) => a.assignment.name.localeCompare(b.assignment.name));
+
+      withErrors.concat(noErrors).forEach((item) => {
+        const assignment = item.assignment;
+        const summary = summariesById.get(assignment.id);
+        const incorrect = summary ? summary.incorrectEntries : [];
+        const missing = summary ? summary.missingMemos : [];
           const sheetName = makeSheetName(assignment.name, usedNames);
           const rows = [
             ["Employee", assignment.name],
