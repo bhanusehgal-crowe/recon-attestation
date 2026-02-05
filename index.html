@@ -481,7 +481,7 @@
         <div class="attestation hidden" id="emp-attestationPanel">
           <div id="emp-attestationMessage" class="muted"></div>
           <div class="form-row" style="margin-top: 10px; align-items: flex-start;">
-            <label for="emp-attestationNotes">Please address the cause for discrepancies in time charged to an assignment or missing memo entries (if any).</label>
+            <label for="emp-attestationNotes">Please provide the cause for discrepancies in time charged to an assignment or missing memo entries (if any).</label>
             <textarea id="emp-attestationNotes" rows="4" placeholder="Add notes here"></textarea>
           </div>
           <div class="form-row" style="margin-top: 10px;">
@@ -1847,9 +1847,7 @@
           `;
         }
 
-        const attestationText = summary.missingMemos.length > 0
-          ? "Please attest that you will return to both systems to update any incorrect hours and add missing memo entries."
-          : "Please attest that your time reconciliation is accurate for this period.";
+        const attestationText = "Please attest that you have checked both systems (Crowe Workday and Client system) to update any incorrect hours and add missing memo entries.";
         els.attestationMessage.textContent = attestationText;
         els.attestationPanel.classList.remove("hidden");
       }
