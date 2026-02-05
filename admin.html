@@ -977,6 +977,7 @@
       const { summariesById, entriesInRange, unmatched, ambiguousEntries } = state.summaries;
       const summaries = Array.from(summariesById.values());
       const incorrectSummaries = summaries.filter((summary) => summary.incorrectEntries.length > 0);
+      const missingMemoSummaries = summaries.filter((summary) => summary.missingMemos.length > 0);
 
       elements.adminSummary.innerHTML = `
         <span class="pill"><strong>Total Entries:</strong> ${entriesInRange.length}</span>
@@ -998,7 +999,6 @@
                 <th>Worker ID</th>
                 <th>Expected Service Line</th>
                 <th>Incorrect Entries</th>
-                <th>Missing Memos</th>
               </tr>
             </thead>
             <tbody>
@@ -1008,6 +1008,33 @@
                   <td>${summary.assignment.workerIdRaw || ""}</td>
                   <td>${summary.assignment.serviceLine}</td>
                   <td>${summary.incorrectEntries.length}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+      }
+
+      if (missingMemoSummaries.length === 0) {
+        html += "<p class='muted'>No missing memos detected for this range.</p>";
+      } else {
+        html += "<h3>Employees with Missing Memos</h3>";
+        html += `
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Worker ID</th>
+                <th>Expected Service Line</th>
+                <th>Missing Memos</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${missingMemoSummaries.map((summary) => `
+                <tr>
+                  <td>${summary.assignment.name}</td>
+                  <td>${summary.assignment.workerIdRaw || ""}</td>
+                  <td>${summary.assignment.serviceLine}</td>
                   <td>${summary.missingMemos.length}</td>
                 </tr>
               `).join("")}
@@ -1209,6 +1236,51 @@
       const dashSheet = XLSX.utils.aoa_to_sheet(dashboard);
       XLSX.utils.book_append_sheet(wb, dashSheet, "Dashboard");
 
+      const incorrectSummaryRows = [[
+        "Employee",
+        "Worker ID",
+        "Expected Service Line",
+        "Incorrect Entries"
+      ]];
+      const missingMemoRows = [[
+        "Employee",
+        "Worker ID",
+        "Expected Service Line",
+        "Missing Memos"
+      ]];
+
+      state.assignments.forEach((assignment) => {
+        const summary = summariesById.get(assignment.id);
+        const incorrect = summary ? summary.incorrectEntries.length : 0;
+        const missing = summary ? summary.missingMemos.length : 0;
+        if (incorrect > 0) {
+          incorrectSummaryRows.push([
+            assignment.name,
+            assignment.workerIdRaw,
+            assignment.serviceLine,
+            incorrect
+          ]);
+        }
+        if (missing > 0) {
+          missingMemoRows.push([
+            assignment.name,
+            assignment.workerIdRaw,
+            assignment.serviceLine,
+            missing
+          ]);
+        }
+      });
+
+      if (incorrectSummaryRows.length > 1) {
+        const incorrectSheet = XLSX.utils.aoa_to_sheet(incorrectSummaryRows);
+        XLSX.utils.book_append_sheet(wb, incorrectSheet, "Incorrect Entries");
+      }
+
+      if (missingMemoRows.length > 1) {
+        const missingSheet = XLSX.utils.aoa_to_sheet(missingMemoRows);
+        XLSX.utils.book_append_sheet(wb, missingSheet, "Missing Memos");
+      }
+
       if (state.attestationEvents && state.attestationEvents.length > 0) {
         const logRows = [["Employee", "Worker ID", "Event", "Timestamp", "Details"]];
         state.attestationEvents.forEach((event) => {
@@ -1241,7 +1313,7 @@
         XLSX.utils.book_append_sheet(wb, unmatchedSheet, "Unmatched");
       }
 
-      const usedNames = new Set(["Dashboard", "Attestation Log", "Unmatched"]);
+      const usedNames = new Set(["Dashboard", "Incorrect Entries", "Missing Memos", "Attestation Log", "Unmatched"]);
       state.assignments.forEach((assignment) => {
         const summary = summariesById.get(assignment.id);
         const incorrect = summary ? summary.incorrectEntries : [];
