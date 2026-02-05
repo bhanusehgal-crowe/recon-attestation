@@ -7,11 +7,15 @@ import { animate, stagger } from "animejs";
 
 export default function LegacyShell({ html, scriptSrc, needsXlsx = false }) {
   useEffect(() => {
-    animate(".card, .choice-card, .dropzone, .attestation, .pill, .status, .badge", {
+    const nodes = Array.from(
+      document.querySelectorAll(".card, .choice-card, .dropzone, .attestation")
+    ).filter((node) => node.offsetParent !== null);
+    if (nodes.length === 0) return;
+    animate(nodes, {
       opacity: [0, 1],
-      translateY: [16, 0],
-      delay: stagger(40, { start: 80 }),
-      duration: 600,
+      translateY: [10, 0],
+      delay: stagger(35, { start: 60 }),
+      duration: 480,
       easing: "outQuad",
     });
   }, []);
