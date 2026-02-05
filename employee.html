@@ -183,7 +183,7 @@
       color: var(--text);
     }
 
-    select, input[type="date"], input[type="text"] {
+    select, input[type="date"], input[type="text"], textarea {
       border-radius: 10px;
       border: 1px solid var(--border);
       padding: 8px 10px;
@@ -192,6 +192,12 @@
       background: var(--card);
       color: var(--text);
       min-width: 160px;
+    }
+
+    textarea {
+      min-width: 260px;
+      width: 100%;
+      resize: vertical;
     }
 
     button {
@@ -321,6 +327,10 @@
       <div id="employeeOutput"></div>
       <div class="attestation hidden" id="attestationPanel">
         <div id="attestationMessage" class="muted"></div>
+        <div class="form-row" style="margin-top: 10px; align-items: flex-start;">
+          <label for="attestationNotes">Please address the cause for discrepancies in time charged to an assignment or missing memo entries (if any).</label>
+          <textarea id="attestationNotes" rows="4" placeholder="Add notes here"></textarea>
+        </div>
         <div class="form-row" style="margin-top: 10px;">
           <input type="checkbox" id="attestationCheck" />
           <label for="attestationCheck">I confirm this reconciliation is accurate for the selected period.</label>
@@ -352,6 +362,7 @@
       employeeOutput: document.getElementById("employeeOutput"),
       attestationPanel: document.getElementById("attestationPanel"),
       attestationMessage: document.getElementById("attestationMessage"),
+      attestationNotes: document.getElementById("attestationNotes"),
       attestationCheck: document.getElementById("attestationCheck"),
       attestationStatus: document.getElementById("attestationStatus"),
       attestBtn: document.getElementById("attestBtn")
@@ -481,6 +492,7 @@
       elements.attestationStatus.textContent = "";
       elements.attestationStatus.className = "muted";
       elements.attestationCheck.checked = false;
+      elements.attestationNotes.value = "";
       state.currentEmployeeId = selectedId;
 
       if (!selectedId || !state.pkg) return;
@@ -568,7 +580,13 @@
         elements.attestationStatus.className = "alert";
         return;
       }
-      await postAttestationEvent("Attested", `Range ${state.pkg.period.start} to ${state.pkg.period.end}`);
+      const notes = elements.attestationNotes.value.trim();
+      if (!notes) {
+        elements.attestationStatus.textContent = "Please enter notes before submitting.";
+        elements.attestationStatus.className = "alert";
+        return;
+      }
+      await postAttestationEvent("Attested", notes);
       elements.attestationStatus.textContent = `Attested on ${new Date().toLocaleString("en-US")}`;
       elements.attestationStatus.className = "success";
     });

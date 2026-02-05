@@ -19,6 +19,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    const employeeCount = Array.isArray(pkg.assignments) ? pkg.assignments.length : null;
     const blob = await put(`packages/${pkg.packageId}.json`, JSON.stringify(pkg), {
       access: "public",
       addRandomSuffix: true,
@@ -27,13 +28,14 @@ export default async function handler(req, res) {
 
     const sql = getSql();
     await sql`
-      insert into packages (package_id, period_start, period_end, generated_at, blob_url)
-      values (${pkg.packageId}, ${pkg.period.start}, ${pkg.period.end}, ${pkg.generatedAt}, ${blob.url})
+      insert into packages (package_id, period_start, period_end, generated_at, blob_url, employee_count)
+      values (${pkg.packageId}, ${pkg.period.start}, ${pkg.period.end}, ${pkg.generatedAt}, ${blob.url}, ${employeeCount})
       on conflict (package_id) do update
         set period_start = excluded.period_start,
             period_end = excluded.period_end,
             generated_at = excluded.generated_at,
-            blob_url = excluded.blob_url
+            blob_url = excluded.blob_url,
+            employee_count = excluded.employee_count
     `;
 
     return sendJson(res, 200, { packageId: pkg.packageId });
