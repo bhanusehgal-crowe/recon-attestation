@@ -247,6 +247,13 @@ const state = {
       elements.attestationStatus.className = "success";
     });
 
+    const empBackBtn = document.getElementById("empBackBtn");
+    if (empBackBtn) {
+      empBackBtn.addEventListener("click", () => {
+        window.location.href = "/";
+      });
+    }
+
     document.getElementById("themeToggle").addEventListener("click", () => {
       document.body.classList.toggle("dark");
       const dark = document.body.classList.contains("dark");

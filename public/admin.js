@@ -1109,6 +1109,13 @@ const state = {
       });
     }
 
+    const adminBackBtn = document.getElementById("adminBackBtn");
+    if (adminBackBtn) {
+      adminBackBtn.addEventListener("click", () => {
+        window.location.href = "/";
+      });
+    }
+
     document.getElementById("themeToggle").addEventListener("click", () => {
       document.body.classList.toggle("dark");
       const dark = document.body.classList.contains("dark");
