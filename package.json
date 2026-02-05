@@ -2,10 +2,32 @@
   "name": "crowe-hourly-reconciliation",
   "private": true,
   "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
     "@vercel/blob": "^2.0.1",
+    "animejs": "^4.0.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.471.0",
+    "motion": "^11.11.13",
+    "next": "^15.1.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "resend": "^3.5.0",
+    "tailwind-merge": "^2.5.2",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.21.0",
+    "eslint-config-next": "^15.1.6",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.17"
   }
 }

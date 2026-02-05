@@ -6,7 +6,9 @@ This version removes employee file uploads. The admin publishes a package to Ver
 1. Create a Neon database and run `schema.sql`.
 2. Create a Vercel Blob store and get a `BLOB_READ_WRITE_TOKEN`.
 3. Set environment variables in Vercel: `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `RESEND_API_KEY`, `MAIL_FROM`.
-4. Deploy to Vercel (static + serverless functions).
+4. Install deps and run Next.js locally:
+   - `npm install`
+   - `npm run dev`
 
 **How It Works**
 - Admin uploads the Excel workbooks in the browser, then clicks **Publish Package**.
@@ -20,10 +22,10 @@ This version removes employee file uploads. The admin publishes a package to Ver
 Vercel Blob currently supports public access only. This app keeps blob URLs private by never exposing them to the browser and by adding a random suffix to each package. If you need stronger access control, add authentication to the API routes or store the package JSON in Neon instead of Blob.
 
 **Files**
-- `index.html`: Combined admin/employee UI.
-- `admin.html`: Admin-only UI.
-- `employee.html`: Employee-only UI.
-- `api/`: Vercel serverless functions.
+- `app/`: Next.js App Router pages that render the legacy HTML.
+- `public/app.js`, `public/admin.js`, `public/employee.js`: Extracted client scripts.
+- `index.html`, `admin.html`, `employee.html`: Legacy markup used by Next.js pages.
+- `pages/api/`: Next.js API routes (migrated from Vercel functions).
 - `schema.sql`: Neon schema.
 
 **API Endpoints**
@@ -34,4 +36,4 @@ Vercel Blob currently supports public access only. This app keeps blob URLs priv
 
 **Local Development**
 1. `npm install`
-2. `vercel dev`
+2. `npm run dev`

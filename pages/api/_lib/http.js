@@ -1,4 +1,10 @@
 export async function readJson(req) {
+  if (req.body) {
+    if (typeof req.body === "string") {
+      return JSON.parse(req.body);
+    }
+    return req.body;
+  }
   const chunks = [];
   for await (const chunk of req) {
     chunks.push(chunk);
