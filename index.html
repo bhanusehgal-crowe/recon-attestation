@@ -490,7 +490,7 @@
           <div id="emp-attestationMessage" class="muted"></div>
           <div class="form-row" style="margin-top: 10px; align-items: flex-start;">
             <label for="emp-attestationNotes">Please provide the cause for discrepancies in time charged to an assignment or missing memo entries (if any).</label>
-            <textarea id="emp-attestationNotes" rows="4" placeholder="Add notes here"></textarea>
+            <textarea id="emp-attestationNotes" rows="4" maxlength="256" placeholder="Add notes here (max 256 characters)"></textarea>
           </div>
           <div class="form-row" style="margin-top: 10px;">
             <input type="checkbox" id="emp-attestationCheck" />
@@ -1331,12 +1331,13 @@
 
         state.assignments.forEach((assignment) => {
           const eventStatus = statusByKey.get(assignment.employeeKey);
-          state.statusMap.set(assignment.employeeKey, {
-            assignment,
-            lastViewed: eventStatus ? eventStatus.lastViewed : null,
-            lastAttested: eventStatus ? eventStatus.lastAttested : null,
-            status: "Not Started"
-          });
+        state.statusMap.set(assignment.employeeKey, {
+          assignment,
+          lastViewed: eventStatus ? eventStatus.lastViewed : null,
+          lastAttested: eventStatus ? eventStatus.lastAttested : null,
+          attestationNotes: eventStatus ? (eventStatus.attestationNotes || "") : "",
+          status: "Not Started"
+        });
         });
 
         let completed = 0;
@@ -1369,23 +1370,25 @@
           <tr>
             <td>${status.assignment.name}</td>
             <td>${status.assignment.workerIdRaw || ""}</td>
-            <td>${status.status}</td>
-            <td>${status.lastViewed ? status.lastViewed.toLocaleString("en-US") : ""}</td>
-            <td>${status.lastAttested ? status.lastAttested.toLocaleString("en-US") : ""}</td>
-            <td>${status.assignment.ambiguousName ? "Ambiguous Name" : ""}</td>
-          </tr>
-        `).join("");
+          <td>${status.status}</td>
+          <td>${status.lastViewed ? status.lastViewed.toLocaleString("en-US") : ""}</td>
+          <td>${status.lastAttested ? status.lastAttested.toLocaleString("en-US") : ""}</td>
+          <td>${status.assignment.ambiguousName ? "Ambiguous Name" : ""}</td>
+          <td>${status.attestationNotes || ""}</td>
+        </tr>
+      `).join("");
         return `
           <table>
             <thead>
               <tr>
-                <th>Employee</th>
-                <th>Worker ID</th>
-                <th>Status</th>
-                <th>Last Viewed</th>
-                <th>Last Attested</th>
-                <th>Notes</th>
-              </tr>
+              <th>Employee</th>
+              <th>Worker ID</th>
+              <th>Status</th>
+              <th>Last Viewed</th>
+              <th>Last Attested</th>
+              <th>Notes</th>
+              <th>Attestation Notes</th>
+            </tr>
             </thead>
             <tbody>${rows}</tbody>
         </table>
@@ -1932,6 +1935,11 @@
         const notes = els.attestationNotes.value.trim();
         if (!notes) {
           els.attestationStatus.textContent = "Please enter notes before submitting.";
+          els.attestationStatus.className = "alert";
+          return;
+        }
+        if (notes.length > 256) {
+          els.attestationStatus.textContent = "Notes must be 256 characters or fewer.";
           els.attestationStatus.className = "alert";
           return;
         }

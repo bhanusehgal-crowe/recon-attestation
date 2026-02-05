@@ -20,7 +20,8 @@ export default async function handler(req, res) {
         max(employee_name) as "employeeName",
         max(worker_id) as "workerId",
         max(case when event_type = 'Viewed' then created_at end) as "lastViewed",
-        max(case when event_type = 'Attested' then created_at end) as "lastAttested"
+        max(case when event_type = 'Attested' then created_at end) as "lastAttested",
+        (array_agg(details order by created_at desc) filter (where event_type = 'Attested'))[1] as "attestationNotes"
       from attestation_events
       where package_id = ${packageId}
       group by employee_key

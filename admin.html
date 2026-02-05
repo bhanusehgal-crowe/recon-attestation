@@ -1175,6 +1175,7 @@
           assignment,
           lastViewed: eventStatus ? eventStatus.lastViewed : null,
           lastAttested: eventStatus ? eventStatus.lastAttested : null,
+          attestationNotes: eventStatus ? (eventStatus.attestationNotes || "") : "",
           status: "Not Started"
         });
       });
@@ -1213,6 +1214,7 @@
           <td>${status.lastViewed ? status.lastViewed.toLocaleString("en-US") : ""}</td>
           <td>${status.lastAttested ? status.lastAttested.toLocaleString("en-US") : ""}</td>
           <td>${status.assignment.ambiguousName ? "Ambiguous Name" : ""}</td>
+          <td>${status.attestationNotes || ""}</td>
         </tr>
       `).join("");
       return `
@@ -1225,6 +1227,7 @@
               <th>Last Viewed</th>
               <th>Last Attested</th>
               <th>Notes</th>
+              <th>Attestation Notes</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>

@@ -4,7 +4,7 @@ import { sendCompletionEmail } from "../_lib/email.js";
 import * as XLSX from "xlsx";
 
 const VALID_EVENTS = new Set(["Viewed", "Attested"]);
-const COMPLETION_RECIPIENTS = ["Meghan.Burns@crowe.com", "Bhanu.Sehgal@crowe.com"];
+const COMPLETION_RECIPIENTS = ["Bhanu.Sehgal@crowe.com"];
 
 async function maybeSendCompletionEmail(sql, packageId) {
   const pkgRows = await sql`
@@ -123,6 +123,10 @@ export default async function handler(req, res) {
 
   try {
     const sql = getSql();
+    const details = String(body.details || "").trim();
+    if (details.length > 256) {
+      return sendText(res, 400, "Notes must be 256 characters or fewer");
+    }
     await sql`
       insert into attestation_events (
         package_id,
@@ -138,7 +142,7 @@ export default async function handler(req, res) {
         ${body.employeeName || ""},
         ${body.workerId || ""},
         ${body.eventType},
-        ${body.details || ""}
+        ${details}
       )
     `;
 

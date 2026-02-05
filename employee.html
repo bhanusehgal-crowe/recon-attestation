@@ -329,7 +329,7 @@
         <div id="attestationMessage" class="muted"></div>
         <div class="form-row" style="margin-top: 10px; align-items: flex-start;">
           <label for="attestationNotes">Please provide the cause for discrepancies in time charged to an assignment or missing memo entries (if any).</label>
-          <textarea id="attestationNotes" rows="4" placeholder="Add notes here"></textarea>
+          <textarea id="attestationNotes" rows="4" maxlength="256" placeholder="Add notes here (max 256 characters)"></textarea>
         </div>
         <div class="form-row" style="margin-top: 10px;">
           <input type="checkbox" id="attestationCheck" />
@@ -581,6 +581,11 @@
       const notes = elements.attestationNotes.value.trim();
       if (!notes) {
         elements.attestationStatus.textContent = "Please enter notes before submitting.";
+        elements.attestationStatus.className = "alert";
+        return;
+      }
+      if (notes.length > 256) {
+        elements.attestationStatus.textContent = "Notes must be 256 characters or fewer.";
         elements.attestationStatus.className = "alert";
         return;
       }
