@@ -1366,10 +1366,12 @@
       }
 
       function renderAttestationTable() {
-        const rows = Array.from(state.statusMap.values()).map((status) => `
-          <tr>
-            <td>${status.assignment.name}</td>
-            <td>${status.assignment.workerIdRaw || ""}</td>
+      const rows = Array.from(state.statusMap.values())
+        .sort((a, b) => a.assignment.name.localeCompare(b.assignment.name))
+        .map((status) => `
+        <tr>
+          <td>${status.assignment.name}</td>
+          <td>${status.assignment.workerIdRaw || ""}</td>
           <td>${status.status}</td>
           <td>${status.lastViewed ? status.lastViewed.toLocaleString("en-US") : ""}</td>
           <td>${status.lastAttested ? status.lastAttested.toLocaleString("en-US") : ""}</td>
